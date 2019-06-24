@@ -1,6 +1,9 @@
 package main
 
-import "fmt"
+import (
+	"errors"
+	"fmt"
+)
 
 // EX1_HELLOWORLD
 // func main() {
@@ -330,45 +333,72 @@ import "fmt"
 // 	sum(nums...)
 // }
 
-//EX15_CLOSURES --------------ask Jax on Monday????
-func intSeq(start int) func() int {
-	i := start
-	return func() int {
-		i++
-		return i
-	}
-}
+//EX15a_CLOSURES
+//Go functions may be closures.
+//A closure is a function value that references variables from outside its body.
+//The function may access and assign to the referenced variables; in this sense the function is "bound" to the variables.
+// func intSeq(start int) func() int {
+// 	i := start
+// 	return func() int {
+// 		i++
+// 		return i
+// 	}
+// }
 
-func bomb(ticks int) func() string {
-	t := ticks
-	return func() string {
-		t--
-		if t > 0 {
-			return "tick"
-		}
-		return "boom!"
-	}
-}
-func main() {
+// func main() {
 
-	nextInt := intSeq(0)
+// 	nextInt := intSeq(0)
 
-	fmt.Println(nextInt())
-	fmt.Println(nextInt())
-	fmt.Println(nextInt())
+// 	fmt.Println(nextInt())
+// 	fmt.Println(nextInt())
+// 	fmt.Println(nextInt())
 
-	newInts := intSeq(10)
-	fmt.Println(newInts())
-	fmt.Println(nextInt())
+// 	newInts := intSeq(10)
+// 	fmt.Println(newInts())
+// 	fmt.Println(nextInt())
+// }
 
-	b := bomb(5)
-	fmt.Println(b())
-	fmt.Println(b())
-	fmt.Println(b())
-	fmt.Println(b())
-	fmt.Println(b())
+//EX15b_CLOSURES
 
-}
+// func bomb(ticks int) func() string {
+// 	t := ticks
+// 	return func() string {
+// 		t--
+// 		if t > 0 {
+// 			return "tick"
+// 		}
+// 		return "boom!"
+// 	}
+// }
+
+// func main() {
+// 	b := bomb(5)
+// 	fmt.Println(b())
+// 	fmt.Println(b())
+// 	fmt.Println(b())
+// 	fmt.Println(b())
+// 	fmt.Println(b())
+// }
+
+//EX15c_CLOSURES
+// import "fmt"
+
+// func adder() func(int) int {
+// 	sum := 0
+// 	return func(x int) int {
+// 		sum += x
+// 		return sum
+// 	}
+// }
+// func main() {
+// 	pos, neg := adder(), adder()
+// 	for i := 0; i < 10; i++ {
+// 		fmt.Println(
+// 			pos(i),
+// 			neg(-2*i),
+// 		)
+// 	}
+// }
 
 //EX16a_RECURSION
 // func fact(n int) int {
@@ -605,56 +635,56 @@ func main() {
 // 	"fmt"
 // )
 
-// func f1(arg int) (int, error) { //By convention, errors are the last return value and have type error, a built-in interface
-// 	if arg == 42 {
+func f1(arg int) (int, error) { //By convention, errors are the last return value and have type error, a built-in interface
+	if arg == 42 {
 
-// 		return -1, errors.New("can't work with 42") //errors.New constructs a basic error value with the given error message
+		return -1, errors.New("can't work with 42") //errors.New constructs a basic error value with the given error message
 
-// 	}
+	}
 
-// 	return arg + 3, nil //A nil value in the error position indicates that there was no error
-// }
+	return arg + 3, nil //A nil value in the error position indicates that there was no error
+}
 
-// type argError struct { //It’s possible to use custom types as errors by implementing the Error() method on them.
-// 	arg  int //Here’s a variant on the example above that uses a custom type to explicitly represent an argument error
-// 	prob string
-// }
+type argError struct { //It’s possible to use custom types as errors by implementing the Error() method on them.
+	arg  int //Here’s a variant on the example above that uses a custom type to explicitly represent an argument error
+	prob string
+}
 
-// func (e *argError) Error() string {
-// 	return fmt.Sprintf("%d - %s", e.arg, e.prob)
-// }
+func (e *argError) Error() string {
+	return fmt.Sprintf("%d - %s", e.arg, e.prob)
+}
 
-// func f2(arg int) (int, error) {
-// 	if arg == 42 {
-// 		return -1, &argError{arg, "can't work with it"} //In this case we use &argError syntax to build a new struct, supplying values for the two fields arg and prob
-// 	}
-// 	return arg + 3, nil
-// }
+func f2(arg int) (int, error) {
+	if arg == 42 {
+		return -1, &argError{arg, "can't work with it"} //In this case we use &argError syntax to build a new struct, supplying values for the two fields arg and prob
+	}
+	return arg + 3, nil
+}
 
-// func main() { //The two loops below test out each of our error-returning functions.
-// 	//Note that the use of an inline error check on the if line is a common idiom in Go code
+func main() { //The two loops below test out each of our error-returning functions.
+	//Note that the use of an inline error check on the if line is a common idiom in Go code
 
-// 	for _, i := range []int{7, 42} {
-// 		if r, e := f1(i); e != nil {
-// 			fmt.Println("f1 failed:", e)
-// 		} else {
-// 			fmt.Println("f1 worked:", r)
-// 		}
-// 	}
-// 	for _, i := range []int{7, 42} {
-// 		if r, e := f2(i); e != nil {
-// 			fmt.Println("f2 failed:", e)
-// 		} else {
-// 			fmt.Println("f2 worked:", r)
-// 		}
-// 	}
+	for _, i := range []int{7, 42} {
+		if r, e := f1(i); e != nil {
+			fmt.Println("f1 failed:", e)
+		} else {
+			fmt.Println("f1 worked:", r)
+		}
+	}
+	for _, i := range []int{7, 42} {
+		if r, e := f2(i); e != nil {
+			fmt.Println("f2 failed:", e)
+		} else {
+			fmt.Println("f2 worked:", r)
+		}
+	}
 
-// 	_, e := f2(42) //If you want to programmatically use the data in a custom error, you’ll need to get the error as an instance of the custom error type via type assertion
-// 	if ae, ok := e.(*argError); ok {
-// 		fmt.Println(ae.arg)
-// 		fmt.Println(ae.prob)
-// 	}
-// }
+	_, e := f2(42) //If you want to programmatically use the data in a custom error, you’ll need to get the error as an instance of the custom error type via type assertion
+	if ae, ok := e.(*argError); ok {
+		fmt.Println(ae.arg)
+		fmt.Println(ae.prob)
+	}
+}
 
 //EX22_GOROUTINES
 
